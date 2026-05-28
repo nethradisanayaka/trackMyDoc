@@ -1,0 +1,222 @@
+/* ==========================================================================
+   TRACKING TIMELINE & MOCK SCANNER COMPONENT (styles/tracking.css)
+   ========================================================================== */
+
+.tracking-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+/* Interactive Scanner Mockup */
+.scanner-card {
+    padding: 28px;
+    height: fit-content;
+}
+.scanner-viewport-wrapper {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Simulated Camera Viewfinder */
+.scanner-viewfinder {
+    width: 100%;
+    max-width: 320px;
+    height: 240px;
+    background: #020617;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+}
+/* Corner highlights in viewfinder */
+.scanner-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--accent-secondary);
+    border-style: solid;
+    pointer-events: none;
+}
+.scanner-corner-tl { top: 12px; left: 12px; border-width: 3px 0 0 3px; }
+.scanner-corner-tr { top: 12px; right: 12px; border-width: 3px 3px 0 0; }
+.scanner-corner-bl { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; }
+.scanner-corner-br { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; }
+
+/* Pulsing Scanning Laser Beam */
+.scanner-laser {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(244, 63, 94, 0), rgba(244, 63, 94, 1) 50%, rgba(244, 63, 94, 0));
+    animation: scannerLaserScan 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--accent-danger);
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes scannerLaserScan {
+    0%, 100% { top: 15%; }
+    50% { top: 85%; }
+}
+
+.scanner-target-mock {
+    width: 120px;
+    height: 120px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+    z-index: 1;
+}
+.scanner-target-mock svg {
+    width: 100px;
+    height: 100px;
+    fill: white;
+    transition: var(--transition-smooth);
+}
+
+.scanner-viewfinder.scanning-active .scanner-corner {
+    border-color: var(--accent-primary);
+}
+.scanner-viewfinder.scanning-active .scanner-laser {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0), rgba(16, 185, 129, 1) 50%, rgba(16, 185, 129, 0));
+    box-shadow: 0 0 8px var(--accent-primary);
+}
+.scanner-viewfinder.scanning-success .scanner-target-mock {
+    border-color: var(--accent-primary);
+    transform: scale(1.05);
+}
+
+/* Scanner Action Form Controls */
+.scanner-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Modern Document Tracking Timeline styling */
+.timeline-card {
+    padding: 28px;
+    height: 100%;
+}
+.timeline-container {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-left: 28px;
+}
+/* Left structural line for timeline */
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: 2px;
+    background: #334155;
+}
+
+.timeline-node {
+    position: relative;
+    padding-bottom: 28px;
+}
+.timeline-node:last-child {
+    padding-bottom: 0;
+}
+
+/* Timeline status bullet indicator */
+.timeline-bullet {
+    position: absolute;
+    left: -28px;
+    top: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 3px solid #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: var(--transition-smooth);
+}
+.timeline-node.completed .timeline-bullet {
+    border-color: var(--accent-primary);
+    background: var(--bg-surface);
+}
+.timeline-node.active .timeline-bullet {
+    border-color: var(--accent-secondary);
+    background: var(--accent-secondary);
+    box-shadow: 0 0 10px var(--accent-secondary-glow);
+    animation: timelineBulletPulse 2s infinite;
+}
+.timeline-node.delayed .timeline-bullet {
+    border-color: var(--accent-danger);
+    background: var(--accent-danger);
+    box-shadow: 0 0 10px var(--accent-danger-glow);
+}
+
+@keyframes timelineBulletPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.timeline-node-content {
+    background: var(--bg-base);
+    border: 1px solid var(--border-color);
+    padding: 16px 20px;
+    border-radius: 8px;
+    transition: var(--transition-fast);
+}
+.timeline-node-content:hover {
+    border-color: var(--accent-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.timeline-header h4 {
+    font-size: 14px;
+}
+.timeline-time {
+    font-size: 11px;
+    color: #64748b;
+}
+.timeline-officer {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.timeline-comment {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+    font-style: italic;
+}
+
+@media (max-width: 1024px) {
+    .tracking-layout {
+        grid-template-columns: 1fr;
+    }
+}

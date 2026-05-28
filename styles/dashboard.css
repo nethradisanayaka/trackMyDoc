@@ -1,0 +1,260 @@
+/* ==========================================================================
+   MAIN DASHBOARD COMPONENT STYLING (styles/dashboard.css)
+   ========================================================================== */
+
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+    padding: 32px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0,0,0,0) 80%);
+    z-index: 0;
+    pointer-events: none;
+}
+.welcome-content {
+    position: relative;
+    z-index: 1;
+}
+.welcome-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+}
+.welcome-content p {
+    color: #94a3b8;
+    max-width: 600px;
+}
+
+/* KPI Summary Cards Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.kpi-card {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: var(--transition-smooth);
+}
+.kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-secondary);
+    box-shadow: var(--shadow-md);
+}
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+.kpi-icon.total { background: rgba(99, 102, 241, 0.1); color: var(--accent-secondary); }
+.kpi-icon.active { background: rgba(16, 185, 129, 0.1); color: var(--accent-primary); }
+.kpi-icon.delayed { background: rgba(244, 63, 94, 0.1); color: var(--accent-danger); }
+.kpi-icon.bottlenecks { background: rgba(245, 158, 11, 0.1); color: var(--accent-warning); }
+
+.kpi-data {
+    display: flex;
+    flex-direction: column;
+}
+.kpi-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 4px;
+}
+
+/* Dashboard Action Center & Activity Split Layout */
+.dashboard-split {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.panel-title {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.panel-title h3 {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.panel-title i {
+    color: var(--accent-secondary);
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+}
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    transition: var(--transition-fast);
+}
+.activity-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.activity-icon.status-change { color: var(--accent-secondary); background: var(--accent-secondary-glow); }
+.activity-icon.created { color: var(--accent-primary); background: var(--accent-primary-glow); }
+.activity-icon.delayed { color: var(--accent-danger); background: var(--accent-danger-glow); }
+
+.activity-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.activity-meta {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+}
+.activity-doc-id {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--accent-secondary);
+}
+
+/* Quick Actions Card Grid */
+.actions-card {
+    padding: 24px;
+}
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+.action-item {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: var(--transition-fast);
+    text-align: left;
+}
+.action-item:hover {
+    border-color: var(--accent-secondary);
+    background: var(--accent-secondary-glow);
+    transform: translateX(4px);
+}
+.action-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--accent-secondary);
+}
+
+/* Interactive Document List Table styling in dashboard */
+.table-panel {
+    overflow: hidden;
+}
+.table-wrapper {
+    overflow-x: auto;
+}
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.dashboard-table th {
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border-color);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.dashboard-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    color: #e2e8f0;
+}
+.dashboard-table tbody tr {
+    transition: var(--transition-fast);
+}
+.dashboard-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.015);
+}
+.doc-id-cell {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--accent-secondary);
+}
+.doc-name-cell {
+    font-weight: 500;
+}
+
+@media (max-width: 1200px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-split {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 640px) {
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}

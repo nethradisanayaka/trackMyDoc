@@ -1,0 +1,231 @@
+/* ==========================================================================
+   DOCUMENT LIST, CRUD, AND WORKFLOW BUILDER STYLING (styles/documents.css)
+   ========================================================================= */
+
+.doc-manager-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.doc-form-card {
+    padding: 28px;
+    height: fit-content;
+}
+.doc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Metadata Key-Value inputs styling */
+.metadata-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+.metadata-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.metadata-title h4 {
+    font-size: 13px;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+.metadata-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.metadata-row input {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 13px;
+    outline: none;
+}
+.metadata-row input:focus {
+    border-color: var(--accent-secondary);
+}
+.btn-delete-row {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--accent-danger);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.btn-delete-row:hover {
+    background: var(--accent-danger);
+    color: white;
+}
+
+/* Configurable Workflow Flow Builder Visualizer */
+.workflow-builder-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.workflow-builder-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* Workflow Stage Block */
+.workflow-stage-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    position: relative;
+    transition: var(--transition-smooth);
+}
+.workflow-stage-block:hover {
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.workflow-stage-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.workflow-stage-index {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-secondary-glow);
+    color: var(--accent-secondary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+}
+.workflow-stage-details h4 {
+    font-size: 14px;
+}
+.workflow-stage-details span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.workflow-stage-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.stage-control-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+}
+.stage-control-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+.stage-control-btn.btn-delete-stage:hover {
+    color: var(--accent-danger);
+    background: rgba(244, 63, 94, 0.1);
+}
+
+/* Connector arrows between stages */
+.workflow-stage-connector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    color: #475569;
+    font-size: 1.1rem;
+    position: relative;
+}
+.workflow-stage-connector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: dashed #334155;
+    z-index: 0;
+}
+.workflow-stage-connector i {
+    z-index: 1;
+    background: var(--bg-surface);
+    padding: 2px;
+}
+
+/* Empty state design */
+.empty-workflow-message {
+    padding: 40px;
+    text-align: center;
+    color: #64748b;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+}
+
+/* Master list view layouts */
+.document-grid-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 24px;
+}
+.document-item-card {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: var(--transition-smooth);
+}
+.document-item-card:hover {
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+}
+.doc-item-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.doc-item-title h4 {
+    font-size: 15px;
+    color: white;
+}
+.doc-item-meta {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.doc-item-meta-id {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--accent-secondary);
+}
+
+@media (max-width: 1024px) {
+    .doc-manager-layout {
+        grid-template-columns: 1fr;
+    }
+}
