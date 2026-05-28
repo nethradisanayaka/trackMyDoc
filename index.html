@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocTrack | Document Tracking & Management System</title>
+    <title>TrackMyDoc | Document Tracking & Management System</title>
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="style.css">
     
@@ -18,7 +18,7 @@
     <div id="root">
         <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: #090D16; color: #9ca3af; font-family: sans-serif;">
             <div style="text-align: center;">
-                <h2 style="color: #fff; margin-bottom: 10px;">Initializing DocTrack Platform...</h2>
+                <h2 style="color: #fff; margin-bottom: 10px;">Initializing TrackMyDoc Platform...</h2>
                 <p>Loading application layers & secure handshake simulation.</p>
             </div>
         </div>
@@ -202,15 +202,15 @@
         function AppProvider({ children }) {
             // Local Databases (Simulated services)
             const [workflows, setWorkflows] = useState(() => {
-                const saved = localStorage.getItem("doctrack_workflows");
+                const saved = localStorage.getItem("TrackMyDoc_workflows");
                 return saved ? JSON.parse(saved) : INITIAL_WORKFLOWS;
             });
             const [documents, setDocuments] = useState(() => {
-                const saved = localStorage.getItem("doctrack_documents");
+                const saved = localStorage.getItem("TrackMyDoc_documents");
                 return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
             });
             const [notifications, setNotifications] = useState(() => {
-                const saved = localStorage.getItem("doctrack_notifications");
+                const saved = localStorage.getItem("TrackMyDoc_notifications");
                 return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
             });
             const [toasts, setToasts] = useState([]);
@@ -218,21 +218,21 @@
 
             // Auth State
             const [user, setUser] = useState(() => {
-                const saved = sessionStorage.getItem("doctrack_user");
+                const saved = sessionStorage.getItem("TrackMyDoc_user");
                 return saved ? JSON.parse(saved) : null;
             });
 
             // Save state when changes occur
             useEffect(() => {
-                localStorage.setItem("doctrack_workflows", JSON.stringify(workflows));
+                localStorage.setItem("TrackMyDoc_workflows", JSON.stringify(workflows));
             }, [workflows]);
 
             useEffect(() => {
-                localStorage.setItem("doctrack_documents", JSON.stringify(documents));
+                localStorage.setItem("TrackMyDoc_documents", JSON.stringify(documents));
             }, [documents]);
 
             useEffect(() => {
-                localStorage.setItem("doctrack_notifications", JSON.stringify(notifications));
+                localStorage.setItem("TrackMyDoc_notifications", JSON.stringify(notifications));
             }, [notifications]);
 
             // Toast Trigger Helper
@@ -253,14 +253,14 @@
                     userProfile = { name: "Sasanka (Standard)", role: "user", token: "mock-jwt-token-user-456123" };
                 }
                 setUser(userProfile);
-                sessionStorage.setItem("doctrack_user", JSON.stringify(userProfile));
+                sessionStorage.setItem("TrackMyDoc_user", JSON.stringify(userProfile));
                 showToast("Authentication Successful", `Logged in as ${userProfile.name} (${userProfile.role.toUpperCase()})`, "success");
                 setCurrentPage("dashboard");
             };
 
             const logout = () => {
                 setUser(null);
-                sessionStorage.removeItem("doctrack_user");
+                sessionStorage.removeItem("TrackMyDoc_user");
                 showToast("Logged Out", "Session closed successfully.", "info");
             };
 
@@ -561,7 +561,7 @@
                             <div className="logo-icon">
                                 <Icons.Document />
                             </div>
-                            <span className="logo-text">DocTrack System</span>
+                            <span className="logo-text">TrackMyDoc System</span>
                         </div>
 
                         <ul className="nav-links">
@@ -855,7 +855,7 @@
                 // Mock SVG QR generating
                 const qrSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" fill="white"/><rect x="10" y="10" width="30" height="30" fill="black"/><rect x="110" y="10" width="30" height="30" fill="black"/><rect x="10" y="110" width="30" height="30" fill="black"/><text x="40" y="90" fill="black" font-size="10">${id}</text></svg>`;
                 link.href = qrSvg;
-                link.download = `DocTrack-${id}-QRCode.svg`;
+                link.download = `TrackMyDoc-${id}-QRCode.svg`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1572,7 +1572,7 @@
                             <div className="login-logo">
                                 <Icons.Document />
                             </div>
-                            <h2 className="login-title">DocTrack Portal</h2>
+                            <h2 className="login-title">TrackMyDoc Portal</h2>
                             <p className="login-subtitle">Service-Oriented Document Routing & Audit System</p>
                         </div>
 
