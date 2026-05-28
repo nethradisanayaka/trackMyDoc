@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocTrack | Document Tracking & Management System</title>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- React & Babel CDNs -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <!-- Target container for our React App -->
+    <div id="root">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: #090D16; color: #9ca3af; font-family: sans-serif;">
+            <div style="text-align: center;">
+                <h2 style="color: #fff; margin-bottom: 10px;">Initializing DocTrack Platform...</h2>
+                <p>Loading application layers & secure handshake simulation.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- React JSX Application Script -->
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext, useMemo, useRef } = React;
+
+        // ==========================================================================
+        // 1. REUSABLE INLINE SVG ICONS
+        // ==========================================================================
+        const Icons = {
+            Dashboard: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            ),
+            Document: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            ),
+            Scanner: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10M12 9v6"/></svg>
+            ),
+            Workflow: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            ),
+            Analytics: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            ),
+            Alert: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            ),
+            Check: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><polyline points="20 6 9 17 4 12"/></svg>
+            ),
+            User: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ),
+            Clock: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ),
+            Search: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            ),
+            Plus: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ),
+            Bell: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            ),
+            Lock: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            ),
+            Download: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ),
+            Info: () => (
+                <svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            )
+        };
+
+        // ==========================================================================
+        // 2. MOCK STATE & SERVICE SIMULATOR ENGINE (AppContext)
+        // ==========================================================================
+        const AppContext = createContext();
+
+        const INITIAL_WORKFLOWS = [
+            {
+                id: "WF-STUDENT-REQ",
+                name: "Student Academic Request",
+                description: "Workflow for student request forms, approvals, and records updates.",
+                stages: [
+                    { step: 1, name: "Submission & Sorting", dept: "Student Counter", slaHours: 2 },
+                    { step: 2, name: "Academic Verification", dept: "Academic Affairs", slaHours: 24 },
+                    { step: 3, name: "Dean's Board Review", dept: "Dean's Office", slaHours: 48 },
+                    { step: 4, name: "Registrar Approval", dept: "Registrar's Office", slaHours: 12 },
+                    { step: 5, name: "Records Dispatch", dept: "IT Support / Counter", slaHours: 4 }
+                ]
+            },
+            {
+                id: "WF-PURCHASE-ORDER",
+                name: "Department Purchase Order",
+                description: "Approval path for capital items, equipment purchase, and financial processing.",
+                stages: [
+                    { step: 1, name: "Requisition Draft", dept: "Originating Department", slaHours: 4 },
+                    { step: 2, name: "Financial Audit", dept: "Finance Branch", slaHours: 24 },
+                    { step: 3, name: "Procurement Bidding", dept: "Tender Board", slaHours: 96 },
+                    { step: 4, name: "VC Approval Signoff", dept: "Vice Chancellor's Office", slaHours: 48 },
+                    { step: 5, name: "PO Generation", dept: "Accounts Department", slaHours: 8 }
+                ]
+            }
+        ];
+
+        const INITIAL_DOCUMENTS = [
+            {
+                id: "DOC-2026-0031",
+                title: "Transcript Issuance Request (AS2023376)",
+                workflowId: "WF-STUDENT-REQ",
+                priority: "high",
+                creator: "Y M N D Disanayaka",
+                createdAt: "2026-05-25T09:30:00Z",
+                status: "Pending Review",
+                currentStep: 3,
+                currentDept: "Dean's Office",
+                metadata: {
+                    indexNo: "AS2023376",
+                    purpose: "Visa Application",
+                    urgency: "Sponsor Deadline"
+                },
+                history: [
+                    { step: 1, name: "Submission & Sorting", dept: "Student Counter", status: "Completed", timestamp: "2026-05-25T09:30:00Z", operator: "Staff_Sajith", notes: "Request lodged with bank payment slip." },
+                    { step: 2, name: "Academic Verification", dept: "Academic Affairs", status: "Completed", timestamp: "2026-05-25T14:15:00Z", operator: "Officer_Nilmini", notes: "All course credits checked. GPA matches records." },
+                    { step: 3, name: "Dean's Board Review", dept: "Dean's Office", status: "Active", timestamp: "2026-05-26T08:00:00Z", operator: "Dean_Assistant", notes: "Queued for board signoff." }
+                ]
+            },
+            {
+                id: "DOC-2026-0045",
+                title: "Research Lab Server Procurement",
+                workflowId: "WF-PURCHASE-ORDER",
+                priority: "medium",
+                creator: "D M O Sasanka",
+                createdAt: "2026-05-24T11:00:00Z",
+                status: "Processing Bids",
+                currentStep: 3,
+                currentDept: "Tender Board",
+                metadata: {
+                    budgetCode: "CS-LAB-2026",
+                    estimatedCost: "$12,500",
+                    itemCount: "2 Nodes"
+                },
+                history: [
+                    { step: 1, name: "Requisition Draft", dept: "Originating Department", status: "Completed", timestamp: "2026-05-24T11:00:00Z", operator: "Sasanka_D", notes: "Specs drafted and uploaded." },
+                    { step: 2, name: "Financial Audit", dept: "Finance Branch", status: "Completed", timestamp: "2026-05-25T10:00:00Z", operator: "Finance_Lead", notes: "Budget approved from department reserve." },
+                    { step: 3, name: "Procurement Bidding", dept: "Tender Board", status: "Active", timestamp: "2026-05-25T11:30:00Z", operator: "Tender_Sec", notes: "RFP released. Awaiting responses." }
+                ]
+            },
+            {
+                id: "DOC-2026-0052",
+                title: "Leave Approval Request - Dr. Dileesha",
+                workflowId: "WF-STUDENT-REQ",
+                priority: "low",
+                creator: "W M H Dileesha",
+                createdAt: "2026-05-28T09:00:00Z",
+                status: "Completed",
+                currentStep: 5,
+                currentDept: "IT Support / Counter",
+                metadata: {
+                    daysCount: "5 Days",
+                    type: "Medical Leave"
+                },
+                history: [
+                    { step: 1, name: "Submission & Sorting", dept: "Student Counter", status: "Completed", timestamp: "2026-05-28T09:00:00Z", operator: "Staff_Sajith", notes: "Lodge form" },
+                    { step: 2, name: "Academic Verification", dept: "Academic Affairs", status: "Completed", timestamp: "2026-05-28T10:00:00Z", operator: "Officer_Nilmini", notes: "Verified coverage" },
+                    { step: 3, name: "Dean's Board Review", dept: "Dean's Office", status: "Completed", timestamp: "2026-05-28T12:00:00Z", operator: "Dean_Assistant", notes: "Approved" },
+                    { step: 4, name: "Registrar Approval", dept: "Registrar's Office", status: "Completed", timestamp: "2026-05-28T15:00:00Z", operator: "Registrar_Admin", notes: "Logged in registry" },
+                    { step: 5, name: "Records Dispatch", dept: "IT Support / Counter", status: "Completed", timestamp: "2026-05-28T16:30:00Z", operator: "Staff_Sajith", notes: "Final document archived." }
+                ]
+            }
+        ];
+
+        const INITIAL_NOTIFICATIONS = [
+            {
+                id: "NOTIF-01",
+                docId: "DOC-2026-0031",
+                docTitle: "Transcript Issuance Request (AS2023376)",
+                type: "warning",
+                message: "SLA Threshold Approaching: Document has spent 56 hours in [Dean's Office] (Limit: 48h).",
+                timestamp: "2026-05-28T16:00:00Z",
+                unread: true
+            },
+            {
+                id: "NOTIF-02",
+                docId: "DOC-2026-0045",
+                docTitle: "Research Lab Server Procurement",
+                type: "danger",
+                message: "SLA Breached: Document has stalled in [Tender Board] for 72 hours.",
+                timestamp: "2026-05-28T11:30:00Z",
+                unread: true
+            }
+        ];
+
+        function AppProvider({ children }) {
+            // Local Databases (Simulated services)
+            const [workflows, setWorkflows] = useState(() => {
+                const saved = localStorage.getItem("doctrack_workflows");
+                return saved ? JSON.parse(saved) : INITIAL_WORKFLOWS;
+            });
+            const [documents, setDocuments] = useState(() => {
+                const saved = localStorage.getItem("doctrack_documents");
+                return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
+            });
+            const [notifications, setNotifications] = useState(() => {
+                const saved = localStorage.getItem("doctrack_notifications");
+                return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+            });
+            const [toasts, setToasts] = useState([]);
+            const [currentPage, setCurrentPage] = useState("dashboard");
+
+            // Auth State
+            const [user, setUser] = useState(() => {
+                const saved = sessionStorage.getItem("doctrack_user");
+                return saved ? JSON.parse(saved) : null;
+            });
+
+            // Save state when changes occur
+            useEffect(() => {
+                localStorage.setItem("doctrack_workflows", JSON.stringify(workflows));
+            }, [workflows]);
+
+            useEffect(() => {
+                localStorage.setItem("doctrack_documents", JSON.stringify(documents));
+            }, [documents]);
+
+            useEffect(() => {
+                localStorage.setItem("doctrack_notifications", JSON.stringify(notifications));
+            }, [notifications]);
+
+            // Toast Trigger Helper
+            const showToast = (title, desc, type = "info") => {
+                const newToast = { id: Date.now().toString(), title, desc, type };
+                setToasts((prev) => [...prev, newToast]);
+                setTimeout(() => {
+                    setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
+                }, 4000);
+            };
+
+            // AUTHENTICATION SERVICE SIMULATION
+            const login = (role) => {
+                let userProfile = { name: "Operator Staff", role: "operator", token: "mock-jwt-token-operator-102938" };
+                if (role === "admin") {
+                    userProfile = { name: "System Admin (Disanayaka)", role: "admin", token: "mock-jwt-token-admin-827361" };
+                } else if (role === "user") {
+                    userProfile = { name: "Sasanka (Standard)", role: "user", token: "mock-jwt-token-user-456123" };
+                }
+                setUser(userProfile);
+                sessionStorage.setItem("doctrack_user", JSON.stringify(userProfile));
+                showToast("Authentication Successful", `Logged in as ${userProfile.name} (${userProfile.role.toUpperCase()})`, "success");
+                setCurrentPage("dashboard");
+            };
+
+            const logout = () => {
+                setUser(null);
+                sessionStorage.removeItem("doctrack_user");
+                showToast("Logged Out", "Session closed successfully.", "info");
+            };
+
+            // DOCUMENT TRACKING AND MANAGEMENT SERVICE SIMULATION
+            const createDocument = (docData) => {
+                const newDocId = `DOC-2026-${String(documents.length + 32).padStart(4, "0")}`;
+                const matchedWorkflow = workflows.find((w) => w.id === docData.workflowId);
+                const firstStage = matchedWorkflow.stages[0];
+
+                const newDoc = {
+                    id: newDocId,
+                    title: docData.title,
+                    workflowId: docData.workflowId,
+                    priority: docData.priority,
+                    creator: user?.name || "Anonymous",
+                    createdAt: new Date().toISOString(),
+                    status: "Initiated",
+                    currentStep: 1,
+                    currentDept: firstStage.dept,
+                    metadata: docData.metadata || {},
+                    history: [
+                        {
+                            step: 1,
+                            name: firstStage.name,
+                            dept: firstStage.dept,
+                            status: "Active",
+                            timestamp: new Date().toISOString(),
+                            operator: user?.name || "System Operator",
+                            notes: "Document created and registered in the system."
+                        }
+                    ]
+                };
+
+                setDocuments((prev) => [newDoc, ...prev]);
+                showToast("Document Registered", `${newDocId} barcode / QR has been generated!`, "success");
+                
+                // RabbitMQ simulation: Broadcast Event
+                simulateMessageQueueEvent("document.created", { docId: newDocId, title: docData.title });
+                return newDoc;
+            };
+
+            // TRACKING SERVICE & RABBITMQ SIMULATION
+            const scanDocumentTransit = (docId, notes = "", selectStep = null) => {
+                const docIndex = documents.findIndex((d) => d.id === docId);
+                if (docIndex === -1) {
+                    showToast("Scan Error", "Invalid QR code identifier.", "danger");
+                    return false;
+                }
+
+                const doc = documents[docIndex];
+                const matchedWorkflow = workflows.find((w) => w.id === doc.workflowId);
+                
+                // Determine next step or custom selected step
+                let nextStepNum = selectStep ? parseInt(selectStep) : doc.currentStep + 1;
+                
+                if (nextStepNum > matchedWorkflow.stages.length) {
+                    // Final Dispatch Completed
+                    const updatedHistory = doc.history.map((h) => 
+                        h.step === doc.currentStep ? { ...h, status: "Completed", timestamp: new Date().toISOString() } : h
+                    );
+                    
+                    const completedDoc = {
+                        ...doc,
+                        status: "Completed",
+                        currentStep: nextStepNum,
+                        currentDept: "Archived / Dispatched",
+                        history: [
+                            ...updatedHistory,
+                            {
+                                step: nextStepNum,
+                                name: "Final Archival",
+                                dept: "System Archive",
+                                status: "Completed",
+                                timestamp: new Date().toISOString(),
+                                operator: user?.name || "System Operator",
+                                notes: notes || "Final approval verified. Document archived."
+                            }
+                        ]
+                    };
+
+                    const updatedDocs = [...documents];
+                    updatedDocs[docIndex] = completedDoc;
+                    setDocuments(updatedDocs);
+                    showToast("Document Completed", `${docId} has finished its processing workflow.`, "success");
+                    
+                    // RabbitMQ notification
+                    simulateMessageQueueEvent("document.completed", { docId, title: doc.title });
+                    return true;
+                }
+
+                // Normal progression to next department
+                const targetStage = matchedWorkflow.stages.find((s) => s.step === nextStepNum);
+                const currentStage = matchedWorkflow.stages.find((s) => s.step === doc.currentStep);
+
+                // Update current step to completed and append new active stage
+                const updatedHistory = doc.history.map((h) => 
+                    h.step === doc.currentStep ? { ...h, status: "Completed", timestamp: new Date().toISOString() } : h
+                );
+
+                const updatedDoc = {
+                    ...doc,
+                    status: `Transit: ${targetStage.name}`,
+                    currentStep: nextStepNum,
+                    currentDept: targetStage.dept,
+                    history: [
+                        ...updatedHistory,
+                        {
+                            step: nextStepNum,
+                            name: targetStage.name,
+                            dept: targetStage.dept,
+                            status: "Active",
+                            timestamp: new Date().toISOString(),
+                            operator: user?.name || "Transit Staff",
+                            notes: notes || `Document scanned in transit to ${targetStage.dept}.`
+                        }
+                    ]
+                };
+
+                const updatedDocs = [...documents];
+                updatedDocs[docIndex] = updatedDoc;
+                setDocuments(updatedDocs);
+                showToast("Transit Scanned", `${docId} routed to ${targetStage.dept}`, "success");
+                
+                // Message Queue event simulation
+                simulateMessageQueueEvent("document.transit", { 
+                    docId, 
+                    from: currentStage.dept, 
+                    to: targetStage.dept, 
+                    stage: targetStage.name 
+                });
+
+                return true;
+            };
+
+            // NOTIFICATION SERVICE SIMULATION (RabbitMQ Consumer simulation)
+            const simulateMessageQueueEvent = (routingKey, payload) => {
+                console.log(`[RabbitMQ MQ Broker] Routing Key: ${routingKey}`, payload);
+                
+                // Logic based on routing event to add real-time notifications
+                if (routingKey === "document.created") {
+                    const newNotification = {
+                        id: `NOTIF-${Date.now()}`,
+                        docId: payload.docId,
+                        docTitle: payload.title,
+                        type: "info",
+                        message: `Event [document.created]: Document ${payload.docId} registered. Tracking initialized.`,
+                        timestamp: new Date().toISOString(),
+                        unread: true
+                    };
+                    setNotifications((prev) => [newNotification, ...prev]);
+                } else if (routingKey === "document.transit") {
+                    const newNotification = {
+                        id: `NOTIF-${Date.now()}`,
+                        docId: payload.docId,
+                        docTitle: payload.docId,
+                        type: "info",
+                        message: `Event [document.transit]: Routed successfully from [${payload.from}] to [${payload.to}].`,
+                        timestamp: new Date().toISOString(),
+                        unread: true
+                    };
+                    setNotifications((prev) => [newNotification, ...prev]);
+                } else if (routingKey === "document.completed") {
+                    const newNotification = {
+                        id: `NOTIF-${Date.now()}`,
+                        docId: payload.docId,
+                        docTitle: payload.title,
+                        type: "success",
+                        message: `Event [document.completed]: Process completed for ${payload.docId}.`,
+                        timestamp: new Date().toISOString(),
+                        unread: true
+                    };
+                    setNotifications((prev) => [newNotification, ...prev]);
+                }
+            };
+
+            const markAllNotificationsRead = () => {
+                setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+                showToast("Alerts Cleared", "All notifications marked as read.", "success");
+            };
+
+            const clearNotification = (id) => {
+                setNotifications((prev) => prev.filter((n) => n.id !== id));
+            };
+
+            // WORKFLOW CREATION
+            const createWorkflow = (wfData) => {
+                const newWf = {
+                    id: `WF-${wfData.name.toUpperCase().replace(/\s+/g, "-").substring(0, 12)}-${Date.now().toString().slice(-4)}`,
+                    name: wfData.name,
+                    description: wfData.description,
+                    stages: wfData.stages.map((s, idx) => ({
+                        step: idx + 1,
+                        name: s.name,
+                        dept: s.dept,
+                        slaHours: parseInt(s.slaHours) || 24
+                    }))
+                };
+                setWorkflows((prev) => [...prev, newWf]);
+                showToast("Workflow Configured", `Template ${newWf.name} registered.`, "success");
+            };
+
+            // ANALYTICS CALCULATIONS
+            const analyticsData = useMemo(() => {
+                const total = documents.length;
+                const completed = documents.filter((d) => d.status === "Completed").length;
+                const active = total - completed;
+                
+                // Mock calculate average times (simulation)
+                const deptWorkload = {};
+                documents.forEach((d) => {
+                    if (d.status !== "Completed") {
+                        deptWorkload[d.currentDept] = (deptWorkload[d.currentDept] || 0) + 1;
+                    }
+                });
+
+                // Set default for main departments if empty
+                const mainDepts = ["Student Counter", "Academic Affairs", "Dean's Office", "Registrar's Office", "Finance Branch", "Tender Board"];
+                mainDepts.forEach((dept) => {
+                    if (deptWorkload[dept] === undefined) {
+                        deptWorkload[dept] = 0;
+                    }
+                });
+
+                // Calculate SLA Breaches
+                const delayed = notifications.filter((n) => n.type === "danger" || n.type === "warning").length;
+
+                return {
+                    total,
+                    completed,
+                    active,
+                    delayed,
+                    deptWorkload,
+                    systemHealth: total > 0 ? Math.round(((total - delayed) / total) * 100) : 100
+                };
+            }, [documents, notifications]);
+
+            return (
+                <AppContext.Provider
+                    value={{
+                        user,
+                        login,
+                        logout,
+                        workflows,
+                        documents,
+                        notifications,
+                        toasts,
+                        currentPage,
+                        setCurrentPage,
+                        createDocument,
+                        scanDocumentTransit,
+                        createWorkflow,
+                        markAllNotificationsRead,
+                        clearNotification,
+                        analyticsData,
+                        showToast
+                    }}
+                >
+                    {children}
+                </AppContext.Provider>
+            );
+        }
+
+        const useApp = () => useContext(AppContext);
+
+        // ==========================================================================
+        // 3. COMPONENT: APP TOASTS & NOTIFICATIONS SYSTEM
+        // ==========================================================================
+        function ToastContainer() {
+            const { toasts } = useApp();
+            return (
+                <div className="toast-container">
+                    {toasts.map((t) => (
+                        <div key={t.id} className={`toast ${t.type}`}>
+                            <div className="toast-message">
+                                <div className="toast-title">{t.title}</div>
+                                <div className="toast-desc">{t.desc}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 4. MAIN LAYOUT SHELL (SIDEBAR & HEADER & ROUTER)
+        // ==========================================================================
+        function AppLayout({ children }) {
+            const { user, logout, currentPage, setCurrentPage, notifications, markAllNotificationsRead } = useApp();
+            const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+            const unreadCount = notifications.filter((n) => n.unread).length;
+
+            return (
+                <div className="app-container">
+                    {/* SIDEBAR NAVIGATION */}
+                    <div className="sidebar">
+                        <div className="logo-container">
+                            <div className="logo-icon">
+                                <Icons.Document />
+                            </div>
+                            <span className="logo-text">DocTrack System</span>
+                        </div>
+
+                        <ul className="nav-links">
+                            <li className={`nav-link ${currentPage === "dashboard" ? "active" : ""}`} onClick={() => setCurrentPage("dashboard")}>
+                                <Icons.Dashboard />
+                                <span>Dashboard</span>
+                            </li>
+                            <li className={`nav-link ${currentPage === "documents" ? "active" : ""}`} onClick={() => setCurrentPage("documents")}>
+                                <Icons.Document />
+                                <span>Documents</span>
+                            </li>
+                            <li className={`nav-link ${currentPage === "scanner" ? "active" : ""}`} onClick={() => setCurrentPage("scanner")}>
+                                <Icons.Scanner />
+                                <span>Transit Scanner</span>
+                            </li>
+                            {user?.role === "admin" && (
+                                <li className={`nav-link ${currentPage === "workflow" ? "active" : ""}`} onClick={() => setCurrentPage("workflow")}>
+                                    <Icons.Workflow />
+                                    <span>Workflow Routes</span>
+                                </li>
+                            )}
+                            <li className={`nav-link ${currentPage === "analytics" ? "active" : ""}`} onClick={() => setCurrentPage("analytics")}>
+                                <Icons.Analytics />
+                                <span>Analytics API</span>
+                            </li>
+                        </ul>
+
+                        <div className="sidebar-footer">
+                            <div className="user-profile">
+                                <div className="avatar">{user?.name ? user.name.charAt(0) : "U"}</div>
+                                <div className="user-info">
+                                    <div className="user-name">{user?.name}</div>
+                                    <div className="user-role">{user?.role}</div>
+                                </div>
+                                <button className="logout-btn" onClick={logout} title="Sign Out">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* MAIN CONTENT WRAPPER */}
+                    <div className="main-wrapper">
+                        {/* NAVBAR / HEADER */}
+                        <div className="navbar">
+                            <div className="navbar-title">
+                                {currentPage.toUpperCase()} CONTROL PANEL
+                            </div>
+                            <div className="navbar-actions">
+                                <div className="system-status-indicator">
+                                    <span className="status-dot"></span>
+                                    <span>Services: Active</span>
+                                </div>
+                                
+                                <div className="alert-bell" onClick={() => setShowNotifDropdown(!showNotifDropdown)}>
+                                    <Icons.Bell />
+                                    {unreadCount > 0 && <span className="alert-badge"></span>}
+                                </div>
+
+                                {/* RabbitMQ Notification Queue drop-down */}
+                                {showNotifDropdown && (
+                                    <div className="notifications-dropdown">
+                                        <div className="notifications-dropdown-header">
+                                            <span className="notifications-dropdown-title">RabbitMQ Notification Queue</span>
+                                            {unreadCount > 0 && (
+                                                <button className="notifications-dropdown-clear" onClick={markAllNotificationsRead}>
+                                                    Acknowledge All
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="notifications-dropdown-body">
+                                            {notifications.length === 0 ? (
+                                                <div className="notifications-dropdown-empty">No active notifications</div>
+                                            ) : (
+                                                notifications.map((notif) => (
+                                                    <div key={notif.id} className={`alert-item ${notif.type === "danger" ? "danger" : notif.type === "warning" ? "warning" : "info"}`}>
+                                                        <div className="alert-content">
+                                                            <div className="alert-title">{notif.docTitle}</div>
+                                                            <div className="alert-desc">{notif.message}</div>
+                                                            <div className="alert-meta">
+                                                                <span>{new Date(notif.timestamp).toLocaleTimeString()}</span>
+                                                                {notif.unread && <span style={{ color: "var(--color-primary)", fontWeight: 700 }}>NEW</span>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* PAGE RENDERING CONTAINER */}
+                        <div className="content-container">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 5. PAGE: DASHBOARD VIEW
+        // ==========================================================================
+        function DashboardPage() {
+            const { analyticsData, documents, notifications, setCurrentPage } = useApp();
+
+            return (
+                <div>
+                    {/* KPI COUNTERS ROW */}
+                    <div className="dashboard-grid">
+                        <div className="kpi-card">
+                            <div className="kpi-icon-container primary">
+                                <Icons.Document />
+                            </div>
+                            <div className="kpi-content">
+                                <span className="kpi-value">{analyticsData.total}</span>
+                                <span className="kpi-label">Registered Files</span>
+                            </div>
+                        </div>
+
+                        <div className="kpi-card">
+                            <div className="kpi-icon-container success">
+                                <Icons.Check />
+                            </div>
+                            <div className="kpi-content">
+                                <span className="kpi-value">{analyticsData.completed}</span>
+                                <span className="kpi-label">Completed Approvals</span>
+                            </div>
+                        </div>
+
+                        <div className="kpi-card">
+                            <div className="kpi-icon-container warning">
+                                <Icons.Clock />
+                            </div>
+                            <div className="kpi-content">
+                                <span className="kpi-value">{analyticsData.active}</span>
+                                <span className="kpi-label">Active Transits</span>
+                            </div>
+                        </div>
+
+                        <div className="kpi-card">
+                            <div className="kpi-icon-container danger">
+                                <Icons.Alert />
+                            </div>
+                            <div className="kpi-content">
+                                <span className="kpi-value">{analyticsData.delayed}</span>
+                                <span className="kpi-label">SLA Delays / Breaches</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* TWO COLUMN GRID DETAILS */}
+                    <div className="dashboard-details-grid">
+                        {/* LEFT COLUMN: ACTIVE DOCUMENTS */}
+                        <div className="card-panel">
+                            <h3 className="card-title">
+                                <Icons.Document /> Active Document Worklist
+                            </h3>
+                            <div className="custom-table-container">
+                                <table className="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tracking ID</th>
+                                            <th>Document Description</th>
+                                            <th>Current Department</th>
+                                            <th>SLA Priority</th>
+                                            <th>Transit Route Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {documents.map((doc) => (
+                                            <tr key={doc.id}>
+                                                <td>
+                                                    <span className="doc-id-link" onClick={() => setCurrentPage("documents")}>
+                                                        {doc.id}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div style={{ fontWeight: 600 }}>{doc.title}</div>
+                                                    <div style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>Created: {new Date(doc.createdAt).toLocaleDateString()}</div>
+                                                </td>
+                                                <td>{doc.currentDept}</td>
+                                                <td>
+                                                    <span className={`badge badge-${doc.priority}`}>
+                                                        {doc.priority.toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td>{doc.status}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: WORKLOAD ANALYTICS & DELAY NOTIFICATIONS */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                            {/* Workflow Department Distribution Chart */}
+                            <div className="card-panel">
+                                <h3 className="card-title">
+                                    <Icons.Analytics /> Dept Workload Load
+                                </h3>
+                                <div className="dept-bar-list">
+                                    {Object.entries(analyticsData.deptWorkload).map(([dept, count]) => {
+                                        // Calculate percentage relative to total active docs
+                                        const maxCount = Math.max(...Object.values(analyticsData.deptWorkload), 1);
+                                        const percent = (count / maxCount) * 100;
+                                        return (
+                                            <div className="dept-bar-item" key={dept}>
+                                                <div className="dept-bar-header">
+                                                    <span className="dept-bar-name">{dept}</span>
+                                                    <span className="dept-bar-count">{count} Files</span>
+                                                </div>
+                                                <div className="dept-bar-track">
+                                                    <div className="dept-bar-fill" style={{ width: `${percent}%` }}></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Real-time Alerts Queue */}
+                            <div className="card-panel">
+                                <h3 className="card-title" style={{ color: "var(--color-danger)" }}>
+                                    <Icons.Alert /> SLA Stalled Alerts
+                                </h3>
+                                <div className="alerts-list">
+                                    {notifications.filter(n => n.type === "danger" || n.type === "warning").slice(0, 3).map((notif) => (
+                                        <div className="alert-item warning" key={notif.id}>
+                                            <div className="alert-icon warning">
+                                                <Icons.Alert />
+                                            </div>
+                                            <div className="alert-content">
+                                                <div className="alert-title">{notif.docTitle}</div>
+                                                <div className="alert-desc">{notif.message}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {notifications.filter(n => n.type === "danger" || n.type === "warning").length === 0 && (
+                                        <div style={{ color: "var(--color-text-muted)", fontSize: "0.85rem", textAlign: "center", padding: "16px" }}>
+                                            All tracking channels within SLA safety boundaries!
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 6. PAGE: DOCUMENT MANAGER (REGISTRATION & TIMELINE VIEW)
+        // ==========================================================================
+        function DocumentPage() {
+            const { documents, workflows, createDocument, scanDocumentTransit, user } = useApp();
+            const [selectedDoc, setSelectedDoc] = useState(documents[0] || null);
+
+            // Form States
+            const [title, setTitle] = useState("");
+            const [workflowId, setWorkflowId] = useState(workflows[0]?.id || "");
+            const [priority, setPriority] = useState("medium");
+            const [metadataKey, setMetadataKey] = useState("");
+            const [metadataVal, setMetadataVal] = useState("");
+
+            const handleCreate = (e) => {
+                e.preventDefault();
+                if (!title) return;
+
+                const docData = {
+                    title,
+                    workflowId,
+                    priority,
+                    metadata: metadataKey ? { [metadataKey]: metadataVal } : {}
+                };
+
+                const newDoc = createDocument(docData);
+                setSelectedDoc(newDoc);
+                
+                // Reset form
+                setTitle("");
+                setMetadataKey("");
+                setMetadataVal("");
+            };
+
+            const downloadMockQR = (id) => {
+                const link = document.createElement("a");
+                // Mock SVG QR generating
+                const qrSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" fill="white"/><rect x="10" y="10" width="30" height="30" fill="black"/><rect x="110" y="10" width="30" height="30" fill="black"/><rect x="10" y="110" width="30" height="30" fill="black"/><text x="40" y="90" fill="black" font-size="10">${id}</text></svg>`;
+                link.href = qrSvg;
+                link.download = `DocTrack-${id}-QRCode.svg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="manager-layout">
+                    {/* LEFT PANEL: DOCUMENT REGISTRATION FORM & MASTER LIST */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                        {/* Create Document Panel */}
+                        <div className="card-panel">
+                            <h3 className="card-title">
+                                <Icons.Plus /> Register New Document & Generate Barcode
+                            </h3>
+                            <form onSubmit={handleCreate} className="doc-form-grid">
+                                <div className="form-group grid-span-2">
+                                    <label className="form-label">Document Title / File Name</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="e.g. Academic Appeal Board Form (AS2023570)" 
+                                        value={title} 
+                                        onChange={(e) => setTitle(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Workflow Template Route</label>
+                                    <select 
+                                        className="form-input"
+                                        style={{ backgroundColor: "#000", color: "#fff" }}
+                                        value={workflowId}
+                                        onChange={(e) => setWorkflowId(e.target.value)}
+                                    >
+                                        {workflows.map((wf) => (
+                                            <option key={wf.id} value={wf.id}>{wf.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">SLA Urgency Level</label>
+                                    <select 
+                                        className="form-input"
+                                        style={{ backgroundColor: "#000", color: "#fff" }}
+                                        value={priority}
+                                        onChange={(e) => setPriority(e.target.value)}
+                                    >
+                                        <option value="low">Low Priority</option>
+                                        <option value="medium">Medium Priority</option>
+                                        <option value="high">High Priority (SLA Warning Active)</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Metadata Key (Optional)</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="e.g. IndexNo" 
+                                        value={metadataKey} 
+                                        onChange={(e) => setMetadataKey(e.target.value)} 
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Metadata Value (Optional)</label>
+                                    <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="e.g. AS2023570" 
+                                        value={metadataVal} 
+                                        onChange={(e) => setMetadataVal(e.target.value)} 
+                                    />
+                                </div>
+                                <div className="grid-span-2" style={{ textAlign: "right", marginTop: "10px" }}>
+                                    <button type="submit" className="btn btn-primary">
+                                        <Icons.Plus /> Register & Print QR Label
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Document Catalog */}
+                        <div className="card-panel">
+                            <h3 className="card-title">
+                                <Icons.Document /> Document Ledger
+                            </h3>
+                            <div className="custom-table-container">
+                                <table className="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tracking ID</th>
+                                            <th>Title</th>
+                                            <th>Current Station</th>
+                                            <th>Workflow</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {documents.map((doc) => (
+                                            <tr 
+                                                key={doc.id} 
+                                                onClick={() => setSelectedDoc(doc)}
+                                                style={{ cursor: "pointer", background: selectedDoc?.id === doc.id ? "rgba(99, 102, 241, 0.08)" : "" }}
+                                            >
+                                                <td><span className="doc-id-link">{doc.id}</span></td>
+                                                <td>{doc.title}</td>
+                                                <td>{doc.currentDept}</td>
+                                                <td>{workflows.find(w => w.id === doc.workflowId)?.name}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT PANEL: SELECTED DOCUMENT SPECIFICS, QR, & TIMELINE */}
+                    <div>
+                        {selectedDoc ? (
+                            <div className="card-panel">
+                                <h3 className="card-title" style={{ justifyContent: "space-between" }}>
+                                    <span>Tracking: {selectedDoc.id}</span>
+                                    <span className={`badge badge-${selectedDoc.priority}`}>{selectedDoc.priority.toUpperCase()}</span>
+                                </h3>
+
+                                <div style={{ marginBottom: "20px" }}>
+                                    <h4 style={{ fontSize: "1.1rem", marginBottom: "8px" }}>{selectedDoc.title}</h4>
+                                    <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>Registered By: {selectedDoc.creator}</p>
+                                    <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>Created On: {new Date(selectedDoc.createdAt).toLocaleString()}</p>
+                                </div>
+
+                                {/* QR Generation Panel */}
+                                <div className="qr-container">
+                                    <div className="qr-box">
+                                        {/* Mock visual barcode / QR code using CSS */}
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "2px", width: "120px", height: "120px", background: "white", padding: "10px" }}>
+                                            <div style={{ background: "black", gridColumn: "span 4", gridRow: "span 4" }}></div>
+                                            <div style={{ background: "white", gridColumn: "span 4" }}></div>
+                                            <div style={{ background: "black", gridColumn: "span 4", gridRow: "span 4" }}></div>
+                                            
+                                            <div style={{ background: "black", gridColumn: "span 2" }}></div>
+                                            <div style={{ background: "black", gridColumn: "span 2" }}></div>
+                                            
+                                            <div style={{ background: "black", gridColumn: "span 4", gridRow: "span 4" }}></div>
+                                            <div style={{ background: "white", gridColumn: "span 4" }}></div>
+                                            <div style={{ background: "black", gridColumn: "span 4" }}></div>
+                                            
+                                            <div style={{ background: "black", gridColumn: "span 2" }}></div>
+                                            <div style={{ background: "black", gridColumn: "span 6" }}></div>
+                                        </div>
+                                    </div>
+                                    <div className="qr-placeholder-text">QR code contains payload: {selectedDoc.id}</div>
+                                    <div style={{ marginTop: "12px", width: "100%" }}>
+                                        <button className="btn btn-secondary" style={{ width: "100%" }} onClick={() => downloadMockQR(selectedDoc.id)}>
+                                            <Icons.Download /> Save QR Code
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Metadata List */}
+                                {Object.keys(selectedDoc.metadata).length > 0 && (
+                                    <div style={{ marginBottom: "24px" }}>
+                                        <h5 style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: "8px" }}>Extended Fields</h5>
+                                        <div style={{ background: "rgba(0,0,0,0.2)", padding: "12px", borderRadius: "var(--radius-md)" }}>
+                                            {Object.entries(selectedDoc.metadata).map(([k, v]) => (
+                                                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem" }}>
+                                                    <span style={{ color: "var(--color-text-muted)" }}>{k}:</span>
+                                                    <span style={{ fontWeight: 600 }}>{v}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Graphical Timeline Audit Log */}
+                                <div className="timeline-card">
+                                    <h4 className="card-title">
+                                        <Icons.Clock /> Transit History / Audit Trail
+                                    </h4>
+                                    
+                                    <div className="timeline-flow">
+                                        {selectedDoc.history.map((hist, idx) => {
+                                            const isLast = idx === selectedDoc.history.length - 1;
+                                            const isActive = hist.status === "Active";
+                                            // Mock delay condition (for visually demonstrating stalled state)
+                                            const isDelayed = selectedDoc.priority === "high" && idx === selectedDoc.history.length - 1 && selectedDoc.status !== "Completed";
+
+                                            return (
+                                                <div key={idx} className={`timeline-node ${isActive ? 'active' : 'completed'} ${isDelayed ? 'delayed' : ''}`}>
+                                                    <div className="timeline-indicator"></div>
+                                                    <div className="timeline-node-body">
+                                                        <div className="timeline-node-header">
+                                                            <span className="timeline-node-title">{hist.name}</span>
+                                                            <span className="timeline-node-time">{new Date(hist.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                        </div>
+                                                        <div className="timeline-node-desc">
+                                                            <span>Office: <strong>{hist.dept}</strong></span>
+                                                            <div style={{ fontStyle: "italic", fontSize: "0.8rem", color: "var(--color-text-muted)", marginTop: "2px" }}>
+                                                                "{hist.notes}"
+                                                            </div>
+                                                        </div>
+                                                        <div className="timeline-node-meta">
+                                                            <span className="timeline-operator">Operator: {hist.operator}</span>
+                                                            {!isActive && <span className="timeline-node-duration">Completed</span>}
+                                                            {isActive && <span className="timeline-node-duration" style={{ color: isDelayed ? "var(--color-danger)" : "var(--color-warning)" }}>
+                                                                {isDelayed ? "SLA Overdue" : "In Progress"}
+                                                            </span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="card-panel" style={{ textAlign: "center", padding: "48px 0" }}>
+                                <Icons.Document />
+                                <p style={{ marginTop: "16px", color: "var(--color-text-muted)" }}>Select a document from the ledger to load history and QR codes.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 7. PAGE: TRANSIT SCANNER (MOCK WEBCAM / EVENT DRIVER)
+        // ==========================================================================
+        function ScannerPage() {
+            const { documents, workflows, scanDocumentTransit, user } = useApp();
+            const [selectedDocId, setSelectedDocId] = useState(documents[0]?.id || "");
+            const [notes, setNotes] = useState("");
+            const [customStep, setCustomStep] = useState("");
+            const [scanning, setScanning] = useState(false);
+            const [scanSuccess, setScanSuccess] = useState(false);
+
+            // Populate next steps based on document selection
+            const currentDoc = documents.find((d) => d.id === selectedDocId);
+            const workflow = currentDoc ? workflows.find((w) => w.id === currentDoc.workflowId) : null;
+            const currentStage = workflow ? workflow.stages.find((s) => s.step === currentDoc.currentStep) : null;
+
+            const handleScanSubmit = (e) => {
+                e.preventDefault();
+                if (!selectedDocId) return;
+
+                // Trigger scan animation
+                setScanning(true);
+                setScanSuccess(false);
+
+                setTimeout(() => {
+                    setScanning(false);
+                    const success = scanDocumentTransit(selectedDocId, notes, customStep || null);
+                    if (success) {
+                        setScanSuccess(true);
+                        setNotes(""); // Reset
+                        setCustomStep("");
+                        setTimeout(() => setScanSuccess(false), 3000);
+                    }
+                }, 1200);
+            };
+
+            return (
+                <div className="scanner-grid">
+                    {/* LEFT PANEL: WEBCAM SCAN VIEWPORT SIMULATOR */}
+                    <div className="card-panel" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <h3 className="card-title">
+                            <Icons.Scanner /> Interactive Handheld / Flatbed Scanner Simulator
+                        </h3>
+                        
+                        <div className="scanner-viewfinder-container">
+                            <div className="scanner-webcam-overlay"></div>
+                            {scanning && <div className="scanner-laser"></div>}
+                            
+                            <div className="scanner-target-box">
+                                {/* Simulated Document QR Graphic */}
+                                <div style={{ width: "100px", height: "100px", background: "white", padding: "8px", position: "relative", opacity: scanning ? 0.3 : 1, transition: "opacity 0.2s" }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "2px", height: "100%" }}>
+                                        <div style={{ background: "black", gridColumn: "span 2", gridRow: "span 2" }}></div>
+                                        <div style={{ background: "white", gridColumn: "span 2" }}></div>
+                                        <div style={{ background: "black", gridColumn: "span 2", gridRow: "span 2" }}></div>
+                                        
+                                        <div style={{ background: "black", gridColumn: "span 3" }}></div>
+                                        <div style={{ background: "black", gridColumn: "span 3" }}></div>
+                                        
+                                        <div style={{ background: "black", gridColumn: "span 2", gridRow: "span 2" }}></div>
+                                        <div style={{ background: "white", gridColumn: "span 4" }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="scanner-instructions">
+                                {scanning ? "Decoding barcode sequence..." : "Position Barcode/QR label inside brackets to record transition event."}
+                            </div>
+
+                            {scanSuccess && (
+                                <div className="scanner-success-toast">
+                                    SUCCESS: Dispatch logged & RabbitMQ notified!
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* RIGHT PANEL: TRANSIT EVENT LOGGER FORM */}
+                    <div className="card-panel">
+                        <h3 className="card-title">
+                            <Icons.Workflow /> Log Document Transit Step
+                        </h3>
+                        
+                        <form onSubmit={handleScanSubmit} className="action-card">
+                            <div className="form-group">
+                                <label className="form-label">Select Target File (Scan Target)</label>
+                                <select 
+                                    className="form-input"
+                                    style={{ backgroundColor: "#000", color: "#fff" }}
+                                    value={selectedDocId}
+                                    onChange={(e) => setSelectedDocId(e.target.value)}
+                                >
+                                    {documents.filter(d => d.status !== "Completed").map((d) => (
+                                        <option key={d.id} value={d.id}>{d.id} - {d.title}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {currentDoc && currentStage && (
+                                <div style={{ background: "rgba(255,255,255,0.03)", padding: "16px", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                                    <p style={{ fontSize: "0.85rem" }}>
+                                        Current Station: <strong>{currentStage.dept}</strong>
+                                    </p>
+                                    <p style={{ fontSize: "0.85rem", marginTop: "4px" }}>
+                                        Step: <strong>{currentStage.step} ({currentStage.name})</strong>
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="form-group">
+                                <label className="form-label">Override Destination (Optional)</label>
+                                <select 
+                                    className="form-input"
+                                    style={{ backgroundColor: "#000", color: "#fff" }}
+                                    value={customStep}
+                                    onChange={(e) => setCustomStep(e.target.value)}
+                                >
+                                    <option value="">Auto-Progress to Next Stage</option>
+                                    {workflow && workflow.stages.map((stage) => (
+                                        <option key={stage.step} value={stage.step}>
+                                            Step {stage.step}: {stage.name} ({stage.dept})
+                                        </option>
+                                    ))}
+                                    <option value={workflow ? workflow.stages.length + 1 : 99}>
+                                        Final Stage: Process Approval Complete
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Transit Operator Notes / Logs</label>
+                                <textarea 
+                                    className="form-input" 
+                                    style={{ resize: "none" }}
+                                    rows="3" 
+                                    placeholder="Enter physical file checks, signoffs, or observations..."
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                />
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: "100%", padding: "14px" }} disabled={scanning || !selectedDocId}>
+                                {scanning ? "Performing Scan..." : "Submit Scan Event"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 8. PAGE: WORKFLOW ROUTE CONFIGURATION (ADMIN ONLY)
+        // ==========================================================================
+        function WorkflowConfigPage() {
+            const { workflows, createWorkflow } = useApp();
+            
+            const [name, setName] = useState("");
+            const [description, setDescription] = useState("");
+            const [stages, setStages] = useState([
+                { name: "Submission", dept: "Student Counter", slaHours: "2" },
+                { name: "Officer Verification", dept: "Academic Office", slaHours: "24" }
+            ]);
+
+            const handleAddStageField = () => {
+                setStages([...stages, { name: "", dept: "", slaHours: "24" }]);
+            };
+
+            const handleRemoveStageField = (index) => {
+                setStages(stages.filter((_, idx) => idx !== index));
+            };
+
+            const handleStageChange = (index, field, val) => {
+                const updated = [...stages];
+                updated[index][field] = val;
+                setStages(updated);
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!name || stages.length === 0) return;
+
+                createWorkflow({ name, description, stages });
+                
+                // Clear Form
+                setName("");
+                setDescription("");
+                setStages([
+                    { name: "Submission", dept: "Student Counter", slaHours: "2" },
+                    { name: "Officer Verification", dept: "Academic Office", slaHours: "24" }
+                ]);
+            };
+
+            return (
+                <div className="workflow-setup-grid">
+                    {/* LEFT PANEL: CONFIGURE NEW ROUTE */}
+                    <div className="card-panel">
+                        <h3 className="card-title">
+                            <Icons.Plus /> Design Document Processing Route
+                        </h3>
+                        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <div className="form-group">
+                                <label className="form-label">Workflow Route Name</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    placeholder="e.g. Student Loan Clearance Path"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Description / Purpose</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    placeholder="Routing scheme for finance and library releases"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="form-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span>Processing Stations / Stages</span>
+                                    <button type="button" className="btn btn-secondary" style={{ padding: "4px 8px", fontSize: "0.7rem" }} onClick={handleAddStageField}>
+                                        + Add Stage
+                                    </button>
+                                </label>
+                                
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px", maxHeight: "300px", overflowY: "auto", paddingRight: "4px" }}>
+                                    {stages.map((stage, idx) => (
+                                        <div key={idx} style={{ display: "flex", gap: "8px", alignItems: "center", background: "rgba(0,0,0,0.15)", padding: "10px", borderRadius: "var(--radius-md)" }}>
+                                            <div style={{ flex: 2 }}>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-input" 
+                                                    style={{ padding: "8px", fontSize: "0.8rem" }}
+                                                    placeholder="Stage Name"
+                                                    value={stage.name}
+                                                    onChange={(e) => handleStageChange(idx, "name", e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div style={{ flex: 2 }}>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-input" 
+                                                    style={{ padding: "8px", fontSize: "0.8rem" }}
+                                                    placeholder="Office/Department"
+                                                    value={stage.dept}
+                                                    onChange={(e) => handleStageChange(idx, "dept", e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <input 
+                                                    type="number" 
+                                                    className="form-input" 
+                                                    style={{ padding: "8px", fontSize: "0.8rem" }}
+                                                    placeholder="SLA (hrs)"
+                                                    value={stage.slaHours}
+                                                    onChange={(e) => handleStageChange(idx, "slaHours", e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            {stages.length > 1 && (
+                                                <button type="button" className="stage-badge-btn" onClick={() => handleRemoveStageField(idx)}>
+                                                    &times;
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "12px" }}>
+                                Register Workflow Template
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* RIGHT PANEL: CURRENT INSTALLED WORKFLOWS */}
+                    <div className="card-panel">
+                        <h3 className="card-title">
+                            <Icons.Workflow /> Installed Routing Schemes
+                        </h3>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            {workflows.map((wf) => (
+                                <div key={wf.id} className="card-panel" style={{ background: "rgba(255,255,255,0.01)" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                                        <h4 style={{ fontSize: "1rem" }}>{wf.name}</h4>
+                                        <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-display)", color: "var(--color-primary)", fontWeight: 700 }}>{wf.id}</span>
+                                    </div>
+                                    <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", marginBottom: "16px" }}>{wf.description}</p>
+                                    
+                                    <div>
+                                        <h5 style={{ fontSize: "0.75rem", textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: "8px" }}>Routing sequence</h5>
+                                        {wf.stages.map((s) => (
+                                            <div className="stage-badge-item" key={s.step} style={{ margin: "4px 0" }}>
+                                                <div className="stage-badge-num">{s.step}</div>
+                                                <div className="stage-badge-info">
+                                                    <span className="stage-badge-name">{s.name}</span>
+                                                    <span className="stage-badge-dept"> &rarr; {s.dept}</span>
+                                                </div>
+                                                <span className="stage-badge-sla">SLA: {s.slaHours}h</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 9. PAGE: ANALYTICS & SOC METRICS (SVG CHARTS)
+        // ==========================================================================
+        function AnalyticsPage() {
+            const { documents, workflows } = useApp();
+
+            // Calculate active vs completed percentages
+            const total = documents.length;
+            const completedCount = documents.filter(d => d.status === "Completed").length;
+            const activeCount = total - completedCount;
+
+            const completedPercent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+            const activePercent = total > 0 ? Math.round((activeCount / total) * 100) : 0;
+
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+                    {/* TOP ANALYTICS STATS */}
+                    <div className="analytics-metric-row">
+                        <div className="card-panel" style={{ borderLeft: "4px solid var(--color-primary)" }}>
+                            <div style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--color-text-muted)", fontWeight: 600 }}>Average File Transit Duration</div>
+                            <div style={{ fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-display)", marginTop: "8px" }}>18.4 Hours</div>
+                            <div style={{ fontSize: "0.75rem", color: "var(--color-success)", marginTop: "4px" }}>&darr; 12.3% improvement from last term</div>
+                        </div>
+
+                        <div className="card-panel" style={{ borderLeft: "4px solid var(--color-success)" }}>
+                            <div style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--color-text-muted)", fontWeight: 600 }}>Workflow Success Index</div>
+                            <div style={{ fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-display)", marginTop: "8px" }}>94.2 %</div>
+                            <div style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", marginTop: "4px" }}>Computed across all configured routes</div>
+                        </div>
+
+                        <div className="card-panel" style={{ borderLeft: "4px solid var(--color-danger)" }}>
+                            <div style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--color-text-muted)", fontWeight: 600 }}>Department Bottleneck Risk</div>
+                            <div style={{ fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-display)", marginTop: "8px" }}>High (Dean's Board)</div>
+                            <div style={{ fontSize: "0.75rem", color: "var(--color-danger)", marginTop: "4px" }}>Average processing delays: +8.2h</div>
+                        </div>
+                    </div>
+
+                    {/* SVG GRAPHICS - PURE REACT CHART RENDERING */}
+                    <div className="analytics-charts-grid">
+                        
+                        {/* CHART 1: Workflow Fulfillment Ratio (Donut Chart) */}
+                        <div className="card-panel">
+                            <h3 className="card-title">
+                                <Icons.Analytics /> Workflow Approval Completion Index
+                            </h3>
+                            <div className="svg-chart-container">
+                                <svg width="340" height="220" viewBox="0 0 340 220" className="svg-chart">
+                                    {/* Donut Segments */}
+                                    {total > 0 ? (
+                                        <g>
+                                            {/* Completed Segment (Emerald) */}
+                                            <circle cx="110" cy="110" r="70" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="24" />
+                                            
+                                            {/* Completed Arc (dasharray circumference is 439.8, dashoffset controls stroke) */}
+                                            <circle cx="110" cy="110" r="70" fill="transparent" stroke="var(--color-success)" strokeWidth="24"
+                                                strokeDasharray="439.8"
+                                                strokeDashoffset={439.8 - (439.8 * completedPercent / 100)}
+                                                transform="rotate(-90 110 110)"
+                                                strokeLinecap="round"
+                                            />
+                                            
+                                            {/* Active Arc (dashoffset calculations) */}
+                                            <circle cx="110" cy="110" r="70" fill="transparent" stroke="var(--color-primary)" strokeWidth="24"
+                                                strokeDasharray="439.8"
+                                                strokeDashoffset={439.8 - (439.8 * activePercent / 100)}
+                                                transform={`rotate(${(completedPercent * 3.6) - 90} 110 110)`}
+                                                strokeLinecap="round"
+                                            />
+                                        </g>
+                                    ) : (
+                                        <circle cx="110" cy="110" r="70" fill="transparent" stroke="rgba(255,255,255,0.08)" strokeWidth="24" />
+                                    )}
+
+                                    {/* Donut Center Label */}
+                                    <text x="110" y="105" textAnchor="middle" className="chart-title-text">{total} Files</text>
+                                    <text x="110" y="125" textAnchor="middle" className="chart-label" style={{ fontSize: "10px" }}>TOTAL PROCESSED</text>
+
+                                    {/* Legend */}
+                                    <g transform="translate(210, 80)">
+                                        {/* Completed */}
+                                        <rect x="0" y="0" width="12" height="12" rx="3" fill="var(--color-success)" />
+                                        <text x="20" y="10" className="chart-label">Completed ({completedPercent}%)</text>
+                                        
+                                        {/* Active */}
+                                        <rect x="0" y="24" width="12" height="12" rx="3" fill="var(--color-primary)" />
+                                        <text x="20" y="34" className="chart-label">Active ({activePercent}%)</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* CHART 2: Workflow Route Volume Load (Bar Chart) */}
+                        <div className="card-panel">
+                            <h3 className="card-title">
+                                <Icons.Workflow /> Active Volume by Route Template
+                            </h3>
+                            <div className="svg-chart-container">
+                                <svg width="380" height="220" viewBox="0 0 380 220" className="svg-chart">
+                                    {/* Gridlines */}
+                                    <line x1="50" y1="30" x2="350" y2="30" className="chart-gridline" />
+                                    <line x1="50" y1="80" x2="350" y2="80" className="chart-gridline" />
+                                    <line x1="50" y1="130" x2="350" y2="130" className="chart-gridline" />
+                                    <line x1="50" y1="180" x2="350" y2="180" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+
+                                    {/* Y-Axis Labels */}
+                                    <text x="40" y="34" textAnchor="end" className="chart-label">15</text>
+                                    <text x="40" y="84" textAnchor="end" className="chart-label">10</text>
+                                    <text x="40" y="134" textAnchor="end" className="chart-label">5</text>
+                                    <text x="40" y="184" textAnchor="end" className="chart-label">0</text>
+
+                                    {/* Bar 1: Student Request */}
+                                    <g className="bar-hover">
+                                        <rect x="90" y="60" width="44" height="120" rx="4" fill="url(#indigo-grad)" />
+                                        <text x="112" y="50" textAnchor="middle" className="chart-title-text" style={{ fontSize: "11px" }}>12</text>
+                                        <text x="112" y="200" textAnchor="middle" className="chart-label">Student Req</text>
+                                    </g>
+
+                                    {/* Bar 2: Purchase Order */}
+                                    <g className="bar-hover">
+                                        <rect x="190" y="110" width="44" height="70" rx="4" fill="url(#violet-grad)" />
+                                        <text x="212" y="100" textAnchor="middle" className="chart-title-text" style={{ fontSize: "11px" }}>7</text>
+                                        <text x="212" y="200" textAnchor="middle" className="chart-label">Purchases</text>
+                                    </g>
+
+                                    {/* Bar 3: General Admin */}
+                                    <g className="bar-hover">
+                                        <rect x="290" y="150" width="44" height="30" rx="4" fill="url(#emerald-grad)" />
+                                        <text x="312" y="140" textAnchor="middle" className="chart-title-text" style={{ fontSize: "11px" }}>3</text>
+                                        <text x="312" y="200" textAnchor="middle" className="chart-label">Admin</text>
+                                    </g>
+
+                                    {/* Gradients Definition */}
+                                    <defs>
+                                        <linearGradient id="indigo-grad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="var(--color-primary)" />
+                                            <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.4" />
+                                        </linearGradient>
+                                        <linearGradient id="violet-grad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#a855f7" />
+                                            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.4" />
+                                        </linearGradient>
+                                        <linearGradient id="emerald-grad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="var(--color-success)" />
+                                            <stop offset="100%" stopColor="#059669" stopOpacity="0.4" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 10. PAGE: LOGIN & SESSION HANDSHAKE CREATION
+        // ==========================================================================
+        function LoginPage() {
+            const { login } = useApp();
+            const [selectedRole, setSelectedRole] = useState("admin");
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                login(selectedRole);
+            };
+
+            return (
+                <div className="login-wrapper">
+                    <div className="login-card">
+                        <div className="login-header">
+                            <div className="login-logo">
+                                <Icons.Document />
+                            </div>
+                            <h2 className="login-title">DocTrack Portal</h2>
+                            <p className="login-subtitle">Service-Oriented Document Routing & Audit System</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Simulation Identity Role</label>
+                                <div className="role-selector-grid">
+                                    <div className={`role-option ${selectedRole === 'admin' ? 'selected' : ''}`} onClick={() => setSelectedRole('admin')}>
+                                        <span className="role-icon">🛡️</span>
+                                        <span className="role-label">Admin</span>
+                                    </div>
+                                    <div className={`role-option ${selectedRole === 'operator' ? 'selected' : ''}`} onClick={() => setSelectedRole('operator')}>
+                                        <span className="role-icon">⚡</span>
+                                        <span className="role-label">Operator</span>
+                                    </div>
+                                    <div className={`role-option ${selectedRole === 'user' ? 'selected' : ''}`} onClick={() => setSelectedRole('user')}>
+                                        <span className="role-icon">👤</span>
+                                        <span className="role-label">User</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Mock Access Token Password</label>
+                                <input type="password" className="form-input" value="••••••••••••" disabled />
+                                <div style={{ fontSize: "0.7rem", color: "var(--color-text-muted)", marginTop: "4px" }}>
+                                    Auth Service will emit simulated JWT validation.
+                                </div>
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: "100%", padding: "14px", marginTop: "10px" }}>
+                                Initiate Security Handshake
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================================================
+        // 11. CENTRAL ROUTER ORCHESTRATOR (App)
+        // ==========================================================================
+        function App() {
+            const { user, currentPage } = useApp();
+
+            // If not logged in, force Login page
+            if (!user) {
+                return (
+                    <div>
+                        <LoginPage />
+                        <ToastContainer />
+                    </div>
+                );
+            }
+
+            // Normal Dashboard / Navigation layout
+            return (
+                <AppLayout>
+                    {currentPage === "dashboard" && <DashboardPage />}
+                    {currentPage === "documents" && <DocumentPage />}
+                    {currentPage === "scanner" && <ScannerPage />}
+                    {currentPage === "workflow" && user?.role === "admin" && <WorkflowConfigPage />}
+                    {currentPage === "analytics" && <AnalyticsPage />}
+                    <ToastContainer />
+                </AppLayout>
+            );
+        }
+
+        // Mount React application to DOM
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <AppProvider>
+                <App />
+            </AppProvider>
+        );
+    </script>
+</body>
+</html>
